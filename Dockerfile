@@ -1,13 +1,16 @@
-FROM n8nio/n8n:latest
+FROM node:22-alpine
 
 USER root
 
-RUN if command -v apk > /dev/null; then \
-      apk add --no-cache ffmpeg; \
-    elif command -v apt-get > /dev/null; then \
-      apt-get update && apt-get install -y ffmpeg && rm -rf /var/lib/apt/lists/*; \
-    else \
-      echo "No supported package manager found" && exit 1; \
-    fi
+RUN apk add --no-cache ffmpeg tini bash
+
+RUN npm install -g n8n
 
 USER node
+
+WORKDIR /home/node
+
+EXPOSE 5678
+
+ENTRYPOINT ["tini", "--"]
+CMD ["n8n", "start"]
